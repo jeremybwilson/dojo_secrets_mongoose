@@ -79,16 +79,11 @@
                             <button class="post_msg_btn btn btn-primary btn-sm">Login</button>
                         </div>
                     </form>
-                    <div id="flash_msg" class="col-6">
-                    <% if(messages.user_login_error) { %>
+                    <% if(typeof error !== 'undefined') { %>
                         <ul>
-                        <% for (const message of messages.user_login_error) { %>
-                            <li class='error'><%= message %></li>
-                        <% } %>
+                            <li class='error'><%= error %></li>
                         </ul>
                     <% } %>
-
-                    </div>
                 </div>
             </div>
         </div>

@@ -31,8 +31,6 @@ app.use(session({
     }
 }));
 
-mongoose.Promise = global.Promise;
-
 //schemas
 const UserSchema = new mongoose.Schema({
     first_name: {
@@ -99,8 +97,9 @@ UserSchema.pre('save', function(next){
 // statics is the static information to a Class
 // we will return a boolean value to the handle elsewhere => separation of concerns
 UserSchema.statics.validatePassword = function(password_from_form, stored_hashed_password){
-    validation_result = bcrypt.compare(password_from_form, stored_hashed_password);
-    console.log('Validation result here: ', validation_result);
+// User.prototype.validatePassword = function(password_from_form, stored_hashed_password){s
+    // validation_result = bcrypt.compare(password_from_form, stored_hashed_password);
+    // console.log('Validation result here: ', validation_result);
     return bcrypt.compare(password_from_form, stored_hashed_password);
 };
 
@@ -290,51 +289,26 @@ app.post('/login', (request, response) => {
             if(!userInfo){
                 throw new Error();
             }
-            // request.session.user_id = userInfo._id;
-            // request.session.name = userInfo.first_name;
-            // request.session.email = userInfo.email;
-            // console.log('request.session after adding user_id and email at login: ', request.session);
             console.log(`successfully matched a user in the database`);
-            // console.log(`database stored password: ${userInfo.password}`);
-            // return User.validatePassword(request.body.password, userInfo.password, userInfo._id)
             return User.validatePassword(request.body.password, userInfo.password)
-                .then(user => {
-                    console.log('user information passed into then promise chain is: ', user);
-                    console.log(`user information available here: ${request.body}`);
-                    // add to session info
-                    request.session.user_id = userInfo._id;
-                    request.session.name = userInfo.first_name;
-                    request.session.email = userInfo.email;
-                    request.session.isLoggedIn = true;
-                    // response.render('view', {user, title: 'View User'} );
-                    // render dashboard
-                    console.log('request.session info stored:', request.session);
-                    response.redirect('/secrets');
-                    // response.render('secrets', { session_user_id: userInfo._id, title: 'Secrets page' });
-                })
-                .catch(error => {
-                    // we want to re-render the form so user does not need to re-enter all the information.  
-                    // If doing a re-direct, they would have to type everything again
-                    // const errors = Object.keys(error.errors)
-                    //   .map(key => error.errors[key].message)
-                    for(let key in error.errors){
-                        console.log(error.errors[key].message)
-                        request.flash('user_login_error', error.errors[key].message)
+                .then((result) => {
+                    if(result === true){
+                        // assign session variables
+                        request.session.user_id = userInfo._id;
+                        request.session.email = userInfo.email;
+                        request.session.name = userInfo.first_name;
+                        request.session.isLoggedIn = true;
+                        // render dashboard
+                        response.redirect('/secrets');
+                    } else {
+                        error = result;
+                        response.render('index', { error: 'Invalid password.  Re-enter password.', title: 'Login' });
                     }
-                    response.render('index', { errors, title: 'Login' } );
                 })
         })
         .catch(error => {
             console.log('errors at login:', error);
-            for(let key in error.errors){
-                console.log(error.errors[key].message)
-                request.flash('user_login_error', error.errors[key].message)
-            }
-            // const errors = Object.keys(error.errors)
-            // .map(key => error.errors[key].message)
-            // re-render the form so user does not need to re-enter all the information.
-            // If redirecting, they would have to type everything again
-            response.render('index', { error, title: 'Login' });
+            response.render('index', { error: 'Email and password combination does not exist', title: 'Login' });
         });
 });
 
@@ -343,6 +317,7 @@ app.get('/logout', (request, response) => {
     // request.session.user_id = null;
     // request.session.email = null;
     // request.session.isLoggedIn = null;
+    // session.destroy() instead of all the above null session variables
     request.session.destroy();
     response.redirect('/');
 });
