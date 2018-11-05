@@ -1,0 +1,34 @@
+h1, h2, h3, h4, h5, p, ul, label {
+    display: block;
+}
+
+p, ul {
+    clear: both;
+}
+
+label {
+    width: 100%;
+}
+.error_msg {
+    color: red;
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.signature, .comment {
+    border-radius: 0.2rem;
+    margin: 0 0.2rem;
+}
+
+.error {
+    font-size: 1em;
+}
+
+.strong {
+    font-weight: bold;
+}
+
+.red, .errors, .error {
+    color: red;
+}

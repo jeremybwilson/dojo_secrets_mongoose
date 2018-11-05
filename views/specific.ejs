@@ -1,0 +1,40 @@
+<% include partials/header %>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <% include partials/nav %>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h1>Welcome to the <%= title %> page</h1><hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <p class='strong'>Secret:</p>
+                    <!-- <p class='strong'>Date modified:</p> -->
+                </div>
+                <div class="col-6">
+                    <p><%= secret.content %></p>
+                    <!-- <p><%= secret.createdAt %></p> -->
+                </div>
+                <!-- <div class="col">
+                    <p class='strong'>Actions:</p>
+                    <p><a href='' class='btn btn-primary btn-sm'>Edit</a></p>
+                    <p><a href='' class='btn btn-primary btn-sm'>Delete</a></p>
+                </div> -->
+            </div>
+            <div class="row">
+                <div class="col">
+                    <% if(messages.find_secrets_error) { %>
+                        <ul>
+                        <% for (const message of messages.find_secrets_error) { %>
+                            <li class='error'><%= message %></li>
+                        <% } %>
+                        </ul>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+<% include partials/footer %>

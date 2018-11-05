@@ -1,0 +1,44 @@
+<% include partials/header %>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <% include partials/nav %>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h1>Welcome to the <%= title %> page</h1>
+                    <h3>Existing User login</h3>
+                    <form id="message_form" action="/login" method="POST" class="m-1">
+                        <div class="form-group m-1">
+                            <label for="email" class="col-3">Email:</label>
+                            <div class="col-6">
+                                <input type="text" id="email" class="form-control" name="email">
+                            </div>
+                        </div>
+                        <div class="form-group m-1">
+                            <label for="password" class="col-3">Password:</label>
+                            <div class="col-6">
+                                    <input type="password" id="password" class="form-control" name="password">
+                            </div>
+                        </div>
+                        <div class="form-row d-flex justify-content-start m-2">
+                            <button class="post_msg_btn btn btn-primary btn-sm">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <p>New user <a href="/user/new" title='New User Registration'>Registration</a></p>
+                <div id="flash_msg" class="col-6">
+                    <% if(messages.user_login_error) { %>
+                        <ul>
+                        <% for (var x of messages.user_login_error) { %>
+                            <li class='error'><%= x %></li>
+                        <% } %>
+                        </ul>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+<% include partials/footer %>

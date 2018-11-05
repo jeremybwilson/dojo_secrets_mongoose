@@ -1,0 +1,36 @@
+<% include partials/header %>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <% include partials/nav %>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h1>Welcome to the <%= title %> page</h1><hr />
+                    <% if(typeof user !== 'undefined') { %>
+                    <h3>Hello <%= user.first_name %>.  Here is your profile info.</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <p class='strong'>First name:</p>
+                    <p class='strong'>Last name:</p>
+                    <p class='strong'>Email:</p>
+                    <p class='strong'>Date of Birth:</p>
+                </div>
+                <div class="col-6">
+                    <p><%= user.first_name %></p>
+                    <p><%= user.last_name %></p>
+                    <p><%= user.email %></p>
+                    <p><%= user.date_of_birth %></p>
+                    <% } %>
+                </div>
+                <div class="col">
+                    <p class='strong'>Actions:</p>
+                    <p><a href='' class='btn btn-primary btn-sm'>Edit</a></p>
+                    <p><a href='' class='btn btn-primary btn-sm'>Delete</a></p>
+                </div>
+            </div>
+        </div>
+<% include partials/footer %>

@@ -1,0 +1,95 @@
+<% include partials/header %>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <% include partials/nav %>
+                    <h1>Welcome to the <%= title %> page</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <h3>New User registration</h3>
+                    <form id="registration_form" action="/new" method="POST" class="m-1">
+                        <div class="form-group m-1">
+                            <label for="first_name">First name:</label>
+                            <div>
+                                <input type="text" id="first_name" class="form-control" name="first_name">
+                            </div>
+                        </div>
+                        <div class="form-group m-1">
+                            <label for="last_name">Last name:</label>
+                            <div>
+                                <input type="text" id="last_name" class="form-control" name="last_name">
+                            </div>
+                        </div>
+                        <div class="form-group m-1">
+                            <label for="email">Email:</label>
+                            <div>
+                                <input type="text" id="email" class="form-control" name="email">
+                            </div>
+                        </div>
+                        <div class="form-group m-1">
+                            <label for="date_of_birth">Date of birth:</label>
+                            <div>
+                                <input type="date" id="date_of_birth" class="form-control" name="date_of_birth">
+                            </div>
+                        </div>
+                        <div class="form-group m-1">
+                            <label for="password">Password:</label>
+                            <div>
+                                <input type="password" id="password" class="form-control" name="password">
+                            </div>
+                        </div>
+                        <div class="form-group m-1">
+                            <label for="confirm_password">Confirm password:</label>
+                            <div>
+                                <input type="password" id="confirm_password" class="form-control" name="confirm_password">
+                            </div>
+                        </div>
+                        <div class="form-row d-flex justify-content-start m-2">
+                            <button class="post_msg_btn btn btn-primary btn-sm">Submit</button>
+                        </div>
+                    </form>
+                    <div id='flash_msg'>
+                    <% if(messages.user_registration_error) { %>
+                        <ul>
+                        <% for (var x of messages.user_registration_error) { %>
+                            <li class='error'><%= x %></li>
+                        <% } %>
+                        </ul>
+                    <% } %>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <h3>Existing User login</h3>
+                    <form id="login_form" action="/login" method="POST" class="m-1">
+                        <div class="form-group m-1">
+                            <label for="email">Email:</label>
+                            <div>
+                                <input id="login_email" type="text" class="form-control" name="email">
+                            </div>
+                        </div>
+                        <div class="form-group m-1">
+                            <label for="password">Password:</label>
+                            <div>
+                                <input id="login_password" type="password" class="form-control" name="password">
+                            </div>
+                        </div>
+                        <div class="form-row d-flex justify-content-start m-2">
+                            <button class="post_msg_btn btn btn-primary btn-sm">Login</button>
+                        </div>
+                    </form>
+                    <div id="flash_msg" class="col-6">
+                    <% if(messages.user_login_error) { %>
+                        <ul>
+                        <% for (const message of messages.user_login_error) { %>
+                            <li class='error'><%= message %></li>
+                        <% } %>
+                        </ul>
+                    <% } %>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+<% include partials/footer %>
