@@ -13,10 +13,14 @@
             <div class="row">
                 <div class="col-2">
                     <p class='strong'>Secret:</p>
+                    <p class='strong'>Author:</p>
+                    <p class='strong'>Added on:</p>
                     <!-- <p class='strong'>Date modified:</p> -->
                 </div>
                 <div class="col-6">
                     <p><%= secret.content %></p>
+                    <p><%= userName %></p>
+                    <p><%= secret.createdAt %></p>
                     <!-- <p><%= secret.createdAt %></p> -->
                 </div>
                 <!-- <div class="col">
@@ -27,9 +31,33 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <% if(messages.find_secrets_error) { %>
+                    <% if(typeof secret.comments != 'undefined'){ %>
+                        <div class='comments'>
+                        <% for(const comment of secret.comments){ %>
+                            <p>Test field: <%= secret.comments.ObjectId %></p>
+                            <p><% if(secret.author_id === userId){ %> <%= secret.author_id %> said: <% } %><%= secret.comments[0].content %></p>
+                        <% } %>
+                        </div>
+                    <% } %>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <form action="/secrets/<%= secret.id %>/comments" method="POST">
+                            <div class="form-group">
+                            <label for="comment">Add comment: </label>
+                            <input name="secret" type="hidden" value="<%= secret.id %>">
+                            <input name="user" type="hidden" value="<%= userId %>">
+                            <input class='form-control' type="text" name="content">
+                            <button class="btn btn-primary btn-sm" type="submit">Add Comment</button>
+                            </div>
+                        </form>
+                        <!-- tip to easily see objects printed in full instead of [object Object] -->
+                        <!-- JSON.stringify(messages) --> 
+                        <!-- based on the structure of your messages, determine how to display them -->
+                    <% if(messages.create_comment_error) { %>
                         <ul>
-                        <% for (const message of messages.find_secrets_error) { %>
+                        <% for (const message of messages.create_comment_error) { %>
                             <li class='error'><%= message %></li>
                         <% } %>
                         </ul>

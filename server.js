@@ -32,7 +32,7 @@ app.use(session({
 }));
 
 //schemas
-const UserSchema = new mongoose.Schema({
+const UserSchema = new Schema({
     first_name: {
         type: String,
         required: [true, 'First name is required'],
@@ -71,7 +71,11 @@ const UserSchema = new mongoose.Schema({
             },
         message: "Password requirements: at least one number, uppercase and special character and be at least 8 characters long"
         }
-    }
+    }, 
+    secrets: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Secret'
+    }]
 }, {timestamps: true});
 
 // Hash Password
@@ -107,7 +111,7 @@ mongoose.model('User', UserSchema); // We are setting this Schema in our Models 
 const User = mongoose.model('User', UserSchema);
 
 // secrets are messages to which comments can/will be applied
-const SecretSchema = new mongoose.Schema({
+const SecretSchema = new Schema({
     author_id: {
         type: String,
         required: [true, "User must have a name"]
@@ -116,21 +120,39 @@ const SecretSchema = new mongoose.Schema({
         type: String,
         required: [true, "Message must have content"]
     },
-    user_id: {
+    user: {
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    comments: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: 'Comment'
-        }
-    ],
+    comments: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Comment'
+    }],
     // comments: [CommentSchema]
 }, {timestamps: true});
 
 mongoose.model('Secret', SecretSchema);  // We are setting this Schema in our Models as 'Secret'
 const Secret = mongoose.model('Secret');
+
+// secrets are messages to which comments can/will be applied
+const CommentSchema = new Schema({
+    content: {
+        type: String, 
+        required: [true, "Comment must have content"]
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    secret: {
+        type: Schema.Types.ObjectId,
+        ref: 'Secret'
+    }
+    // comments: [CommentSchema]
+}, {timestamps: true});
+
+mongoose.model('Comment', CommentSchema);  // We are setting this Schema in our Models as 'Secret'
+const Comment = mongoose.model('Comment');
 
 //mongodb connection
 mongoose.connect('mongodb://localhost:27017/dojo_secrets', { useNewUrlParser: true });
@@ -163,20 +185,7 @@ app.get('/secrets', (request, response) => {
         Secret.find({}).sort('-createdAt')
             .then(all_secrets => {
                 const secrets = all_secrets;
-                console.log(`all secrets: ${all_secrets}`);
-                // Comment.find({}, (comments))
-                //     .then(all_comments => {
-                //         const comments = all_comments;
-                //         response.render('secrets', { secrets: secrets, comments: comments, title: 'View all secrets' });
-                //     })
-                //     .catch(error => {
-                //         console.log(`error finding comments`);
-                //         for(let key in error.errors){
-                //             console.log(error.errors[key].message)
-                //             request.flash('find_secrets_error', error.errors[key].message)
-                //         }
-                //         response.render('secrets', { error, title: 'Secrets page' });
-                //     })
+                // console.log(`all secrets: ${all_secrets}`);
                 response.render('secrets', { isLoggedIn, name, secrets: secrets, title: 'Dojo Secrets' });
             })
             .catch(error => {
@@ -209,20 +218,24 @@ app.post('/secrets', function(request, response){
             }
             response.redirect('/secrets');
         })
-})
+});
 
 // view individual secrets => route
 app.get('/secrets/:_id', (request, response) => {
     const which = request.params._id;
     console.log(`getting an individual secret route`);
+    const userId = request.session.user_id;
+    const userName = request.session.name;
     if (request.session.user_id == null){
         response.redirect('/')
     } else {
         response.locals.user_id = request.session.user_id
         Secret.findById(which)
+            .populate({ path: 'user', select: 'first_name' })
+            .populate('comments')
             .then(secret => {
-                console.log(`successfully found and rendered a secret`);
-                response.render('specific', {secret: secret, title: 'View Secret'});
+                console.log('Secret Object after populate method:', JSON.stringify(secret));
+                response.render('specific', {secret: secret,  userId, userName, title: 'View Secret'});
             })
             .catch(error => {
                 console.log('error finding individual secret');
@@ -231,16 +244,43 @@ app.get('/secrets/:_id', (request, response) => {
                     request.flash('find_secrets_error', error.errors[key].message)
                 }
                 response.redirect('/secrets');
-
             });
     }
 });
 
+app.post('/secrets/:_id/comments', (request, response) => {
+    const which = request.params._id;
+    Comment.create(request.body)
+    // Comment.save({ user: request.session.user_id, content: request.body.content })
+        .then(comment => {
+            console.log('successfully created comment using: ', request.body);
+            return Secret.findById({_id:which})
+                .then(secret => {
+                    secret.comments.push(comment);
+                    console.log(`successfully pushed comment to secret`);
+                    return secret.save();
+                })
+                .then(() => {
+                    console.log(`redirecting to individual secret page after comment added`);
+                    response.redirect(`/secrets/${which}`);
+                })
+        })
+        .catch(error => {
+            console.log(`error posting comment to individual secret: ${error}`);
+            for(let key in error.errors){
+                console.log(error.errors[key].message)
+                request.flash('create_comment_error', error.errors[key].message)
+            }
+            response.redirect('/secrets');
+        })
+});
+
 // delete a secret from the db => route
 app.post('/secrets/:_id/delete', (request, response) => {
-    const which = request.params.id;
+    const which = request.params._id;
+    // Secret.deleteOne(which)
     Secret.deleteOne({ _id:which })
-    .then(secrets => {
+    .then(secret => {
         console.log(`successfully deleted a secret`);
         response.redirect('/secrets');
     })
@@ -286,24 +326,19 @@ app.post('/login', (request, response) => {
     console.log(`posting to the user login route`);
     User.findOne({ email: request.body.email })
         .then(userInfo => {
-            if(!userInfo){
-                throw new Error();
-            }
             console.log(`successfully matched a user in the database`);
             return User.validatePassword(request.body.password, userInfo.password)
                 .then((result) => {
-                    if(result === true){
-                        // assign session variables
-                        request.session.user_id = userInfo._id;
-                        request.session.email = userInfo.email;
-                        request.session.name = userInfo.first_name;
-                        request.session.isLoggedIn = true;
-                        // render dashboard
-                        response.redirect('/secrets');
-                    } else {
-                        error = result;
-                        response.render('index', { error: 'Invalid password.  Re-enter password.', title: 'Login' });
+                    if(!result){
+                        throw new Error();
                     }
+                    // assign session variables
+                    request.session.user_id = userInfo._id;
+                    request.session.email = userInfo.email;
+                    request.session.name = userInfo.first_name;
+                    request.session.isLoggedIn = true;
+                    // render dashboard
+                    response.redirect('/secrets');
                 })
         })
         .catch(error => {

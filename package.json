@@ -1,5 +1,5 @@
 {
-  "name": "dojo_secrets",
+  "name": "dojo_secrets_mongoose",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",

@@ -50,7 +50,9 @@
                             <button class="post_msg_btn btn btn-primary btn-sm">Submit</button>
                         </div>
                     </form>
-                    <div id='flash_msg'>
+                    <!-- tip to easily see objects printed in full instead of [object Object] -->
+                    <!-- JSON.stringify(messages) --> 
+                    <!-- based on the structure of your messages, determine how to display them -->
                     <% if(messages.user_registration_error) { %>
                         <ul>
                         <% for (var x of messages.user_registration_error) { %>
@@ -58,7 +60,6 @@
                         <% } %>
                         </ul>
                     <% } %>
-                    </div>
                 </div>
                 <div class="col-6">
                     <h3>Existing User login</h3>
@@ -66,13 +67,13 @@
                         <div class="form-group m-1">
                             <label for="email">Email:</label>
                             <div>
-                                <input id="login_email" type="text" class="form-control" name="email">
+                                <input id="login_email" type="text" class="form-control" value='jeremybwilson@gmail.com' name="email">
                             </div>
                         </div>
                         <div class="form-group m-1">
                             <label for="password">Password:</label>
                             <div>
-                                <input id="login_password" type="password" class="form-control" name="password">
+                                <input id="login_password" type="password" value='Good#5heart' class="form-control" name="password">
                             </div>
                         </div>
                         <div class="form-row d-flex justify-content-start m-2">
