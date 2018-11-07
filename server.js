@@ -27,7 +27,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         secure: false, 
-        maxAge: 60000
+        maxAge: 600000
     }
 }));
 
@@ -231,8 +231,9 @@ app.get('/secrets/:_id', (request, response) => {
     } else {
         response.locals.user_id = request.session.user_id
         Secret.findById(which)
+            // .populate('user')
             .populate({ path: 'user', select: 'first_name' })
-            .populate('comments')
+            .populate({ path: 'comments', populate: { path: 'user'}})
             .then(secret => {
                 console.log('Secret Object after populate method:', JSON.stringify(secret));
                 response.render('specific', {secret: secret,  userId, userName, title: 'View Secret'});
@@ -290,17 +291,23 @@ app.post('/secrets/:_id/delete', (request, response) => {
     })
 });
 
-// registration route
+// delete a secret from the db => route
+app.post('/comments/:_id/delete', (request, response) => {
+    const which = request.params._id;
+    // Secret.deleteOne(which)
+    Comment.deleteOne({ _id:which })
+    .then(secret => {
+        console.log(`successfully deleted a secret`);
+        response.redirect('/secrets');
+    })
+    .catch(error => {
+        console.log('there was an error deleting a secret: ', error);
+        response.redirect('/secrets');
+    })
+});
+
+// registration (new user) route
 app.post('/new', (request, response) => {
-    // response.redirect('/secrets');
-    console.log('POST DATA', request.body);
-    // const user = new User({
-    //     first_name: request.body.first_name,
-    //     last_name: request.body.last_name,
-    //     email: request.body.email,
-    //     date_of_birth: request.body.date_of_birth
-    // });
-    console.log('request.body', request.body)
     console.log(`processed user registration info`);
     User.create(request.body)
         .then(userInfo => {
@@ -356,7 +363,6 @@ app.get('/logout', (request, response) => {
     request.session.destroy();
     response.redirect('/');
 });
-
 
 // catch 404 and forward to error handler
 app.use((request, response, next) => {
